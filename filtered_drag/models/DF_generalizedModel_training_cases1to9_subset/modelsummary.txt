@@ -1,0 +1,20 @@
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ normalization (Normalizati  (None, 5)                 11        
+ on)                                                             
+                                                                 
+ dense (Dense)               (None, 128)               768       
+                                                                 
+ dense_1 (Dense)             (None, 32)                4128      
+                                                                 
+ dense_2 (Dense)             (None, 8)                 264       
+                                                                 
+ dense_3 (Dense)             (None, 1)                 9         
+                                                                 
+=================================================================
+Total params: 5180 (20.24 KB)
+Trainable params: 5169 (20.19 KB)
+Non-trainable params: 11 (48.00 Byte)
+_________________________________________________________________
