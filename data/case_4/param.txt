@@ -1,0 +1,3 @@
+dp=75 mum
+rhop=3000 kg/m3
+<alpha_p>=0.05
