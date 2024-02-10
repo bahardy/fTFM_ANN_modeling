@@ -13,6 +13,7 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
 
 from terminalVelocity import getTerminalVelocity 
 
@@ -403,6 +404,9 @@ Igp_filt_z_model = inv_taup_res_test*(alp_vrz_test + alp_vdz_prediction)/g
 
 X = Igp_filt_z_test
 Y = Igp_filt_z_model
+rmse = mean_squared_error(X, Y, squared=False)
+with open(training_folder  + "rmse_filtered_drag.csv", 'w') as file:
+    print('{:1.6f}'.format(rmse), file=file)
 R2_filteredDrag = r2_score(X, Y)
 
 ## FIGURES 
