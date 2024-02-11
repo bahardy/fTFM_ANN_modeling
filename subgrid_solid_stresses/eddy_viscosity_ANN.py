@@ -210,11 +210,11 @@ y_train = prediction_train
 y_test = prediction_test 
 
 step = 1
-bounds = np.array([0, 0.003])
+bounds = np.array([0, 0.015])
 x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
 y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
-X = labels_test/(rho_p*Ut**2/g)
-Y = y_test/(rho_p*Ut**2/g)
+X = labels_test/(rho_p*Ut**3/g)
+Y = y_test/(rho_p*Ut**3/g)
 R2_train = r2_score(X, Y)
 
 fig = plt.figure()
