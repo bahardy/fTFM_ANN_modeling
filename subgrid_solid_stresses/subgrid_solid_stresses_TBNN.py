@@ -1,6 +1,8 @@
-# This Python script is dedicating to the training and validation of Artifical Neural Network models for the subgrid solid stresses in the filtered Two-Fluid Model 
-# This file is part of the fTFM_ANN_modeling project (https://github.com/bahardy/fTFM_ANN_modeling.git) distributed under BSD-3-Clause license 
-# Copyright (c) Baptiste HARDY. All rights reserved. 
+"""
+This Python script is dedicating to the training and validation of Artifical Neural Network models for the subgrid solid stresses in the filtered Two-Fluid Model 
+This file is part of the fTFM_ANN_modeling project (https://github.com/bahardy/fTFM_ANN_modeling.git) distributed under BSD-3-Clause license 
+Copyright (c) Baptiste HARDY. All rights reserved. 
+"""
 
 import numpy as np 
 import pandas as pd 
@@ -32,11 +34,12 @@ plt.rcParams['legend.fontsize'] = 10
 plt.rcParams['lines.markersize'] = 1
 
 
-#%% --------------- List of constant physical quantities ------------------ %%#
-g        = 9.81   # m/s2
-alp_max  = 0.64
-rho_g    = 1.2    # kg/m3
-mu_g     = 1.8e-5 # Pa.s
+class PhyParam:
+    def __init__(self,g,alp_max,rho_g,mu_g):
+        self.g = g
+        self.alp_max = alp_max = alp_max
+        self.rho_g = rho_g
+        self.mu_g = mu_g
 
 def loadData():
 
@@ -57,6 +60,14 @@ def loadData():
     # data_list.append('../data/case_10/')
 
     n_cases = len(data_list)
+
+    #%% --------------- Constant physical quantities ------------------ %%#
+    g        = 9.81   # m/s2
+    alp_max  = 0.64
+    rho_g    = 1.2    # kg/m3
+    mu_g     = 1.8e-5 # Pa.s
+    
+    cst_param = PhyParam(g,alp_max,rho_g, mu_g)
 
     # -------------------------- Physical and numerical parameters --------------------------  # 
     dp       = np.array([75e-6, 90e-6, 100e-6, 75e-6, 150e-6, 150e-6, 180e-6, 130e-6, 180e-6, 120e-6])
@@ -194,305 +205,305 @@ def loadData():
         L_all.append(df)
 
     df_filteredData = pd.concat(L_all, ignore_index=True) 
-    return df_PhyParam, df_filteredData 
+    return cst_param, df_PhyParam, df_filteredData 
 
-#%% --------------- Main Script ------------------ %% # 
+def main(): 
 
-#---------------------------- Data loading and pre-processing -------------------------------- #
-df_param, df_data = loadData()
-print('Data is loaded') 
-
-# Reshape grad_u and stresses to num_points X 3 X 3 arrays
-num_points = df_data.shape[0]
-grad_u     = np.zeros((num_points, 3, 3))
-sigma_sgs  = np.zeros((num_points, 3, 3))
-
-# grad_u has 9 independent components 
-grad_u[:,0,0] = df_data['dudx'].to_numpy()
-grad_u[:,0,1] = df_data['dudy'].to_numpy()
-grad_u[:,0,2] = df_data['dudz'].to_numpy()
-grad_u[:,1,0] = df_data['dvdx'].to_numpy()
-grad_u[:,1,1] = df_data['dvdy'].to_numpy()
-grad_u[:,1,2] = df_data['dvdz'].to_numpy()
-grad_u[:,2,0] = df_data['dwdx'].to_numpy()
-grad_u[:,2,1] = df_data['dwdy'].to_numpy()
-grad_u[:,2,2] = df_data['dwdz'].to_numpy()
-
-# sigma_sgs has 6 independent components 
-sigma_sgs[:,0,0] = df_data['sig_xx']
-sigma_sgs[:,0,1] = df_data['sig_xy']
-sigma_sgs[:,0,2] = df_data['sig_xz']
-sigma_sgs[:,1,0] = df_data['sig_xy'] #sig_yx = sig_xy
-sigma_sgs[:,1,1] = df_data['sig_yy']
-sigma_sgs[:,1,2] = df_data['sig_yz']
-sigma_sgs[:,2,0] = df_data['sig_xz'] #sig_zx = sig_xz
-sigma_sgs[:,2,1] = df_data['sig_yz'] #sig_zy = sig_yz
-sigma_sgs[:,2,2] = df_data['sig_zz'] 
-
-
-alp     = df_data['alp'].to_numpy().reshape(-1,1)
-vrz     = df_data['vrz'].to_numpy().reshape(-1,1)
-Delta_f = df_data['Delta_f'].to_numpy().reshape(-1,1)
-
-# Neural Network Parameters
-enforce_realizability = False                 # Set to True to enforce realizability constraint on Reynolds stresses
-num_realizability_its = 5                    # Number of iterations to enforce realizability
-seed                  = 1234                 # Random seed
-num_layers            = 8                    # Number of hidden layers
-num_nodes             = 30                   # Number of nodes per layer
-train_fraction        = 0.8                  # Fraction of data used for training 
-val_fraction          = 1 - train_fraction   # Fraction of data used for validation/testing
-initial_lr            = 0.0005               # Initial learning rate 
-BATCH_SIZE            = 500                  # Size of a data batch
-N_EPOCHS_MAX          = 1000                 # Maximum number of training epochs
-activation            = 'relu'               # Activation function of the nodes 
-# TBNN parametrs 
-num_scalar_invariants = 3
-num_tensors           = 4
-
-
-# Model training options
-train_model     = 1 # set to 1 to start new training 
-resume_training = 0 # set to 1 to resume previous training 
-# if neither train_model nor resume_training is set to 1 ('true'), the previously trained model from the given folder is loaded 
-
-# Create folder for saving model 
-training_folder = './models/subgrid_stress_TBNN_model_subset/'
-postpro_folder  = training_folder 
-# postpro_folder  = './models/subgrid_stress_TBNN_model_withRealizability/' 
-os.makedirs(training_folder,exist_ok=True)
-os.makedirs(postpro_folder,exist_ok=True)
-os.makedirs(postpro_folder + '/figures/',exist_ok=True)
-
-
-#Compute strain rate and rotation rate tensors 
-data_processor = TurbulenceDataProcessor()
-Sij, Rij       = data_processor.calc_Sij_Rij(grad_u)
-sb    = data_processor.calc_scalar_basis(Sij, Rij, num_invariants=num_scalar_invariants)  # Scalar basis
-tb    = data_processor.calc_tensor_basis(Sij, Rij, num_tensor_basis=num_tensors)                         # Tensor basis
-label = data_processor.calc_output(sigma_sgs)
-
-x = np.concatenate((sb, alp, vrz, Delta_f), axis=1)
-print("Data processing: done")
-
-if seed:
-    np.random.seed(seed) # sets the random seed 
-
-# Split into training and test data sets
-x_train, tb_train, label_train, x_test, tb_test, label_test, train_idx, test_idx = \
-    TurbulenceDataProcessor.train_test_split_TBNN(x, tb, label, fraction=train_fraction, seed=seed)
-
-if (train_model):
-    print("TBNN Model building starts...")
-
-    #---------------------------- Build Tensor Basis Neural Network ----------------------------#
-    num_inputs       = x.shape[-1]
-    num_tensor_basis = tb.shape[1]
-    x_input          = tf.keras.Input(shape=num_inputs)
-    tb_input         = tf.keras.Input(shape=(num_tensor_basis,9))
-
-    normalization_scalar_layer = tf.keras.layers.Normalization(axis=1, name='NormalizationLayerSB', input_dim=num_inputs)
-    normalization_scalar_layer.adapt(x)
-    scalar_layer               = normalization_scalar_layer(x_input)
-    hidden_layer               = tf.keras.layers.Dense(units=num_nodes, activation='relu')(scalar_layer)
-    for i in range(num_layers-1):
-        hidden_layer           = tf.keras.layers.Dense(units=num_nodes, activation='relu')(hidden_layer)
-    linear_layer               = tf.keras.layers.Dense(units=num_tensor_basis, activation='linear',name='LinearLayer')(hidden_layer)
-
-    normalization_tensor_layer = tf.keras.layers.Normalization(axis=1, name='NormalizationLayerTB', input_dim=num_tensor_basis)
-    normalization_tensor_layer.adapt(tb)
-    tensor_layer               = normalization_tensor_layer(tb_input)
-    output                     = tf.keras.layers.Dot((1,1))([linear_layer, tensor_layer])
-    model                      = tf.keras.Model(inputs=[x_input, tb_input], outputs=output)
-
-    tf.keras.utils.plot_model(model, training_folder + 'model.png') 
-
-    #---------------------------- Compile model ----------------------------# 
-    n_train_tot     = x_train.shape[0]
-    n_val           = int(x_train.shape[0]*val_fraction)    # number of data points used for validation during training procedure
-    n_train         = n_train_tot - n_val                   # number of data points used for training 
-    steps_per_epoch = math.ceil(n_train/BATCH_SIZE)         # number of batch passes per epoch 
-    lr_schedule     = keras.optimizers.schedules.InverseTimeDecay(
-                        initial_lr, 
-                        decay_steps=steps_per_epoch*10, 
-                        decay_rate=1, 
-                        staircase=False) #decay applied every 10 epochs
-    model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(lr_schedule))
-    print("Model is compiled")
-    model.summary()
-
-    # Creates callbacks for early stopping, log and checkpointing
-    stop_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20)
-
-    #Train the model 
-    print("Model training starts...")
-    training_history = model.fit([x_train, tb_train], 
-                        label_train, 
-                        batch_size=BATCH_SIZE, 
-                        epochs=N_EPOCHS_MAX, 
-                        validation_split=val_fraction, 
-                        verbose=1, 
-                        callbacks=[stop_callback])
-
-    history = training_history.history
-    with open(training_folder + 'history', 'wb') as file:
-        pickle.dump(history, file)
-
-    print("Model saving ...")
-    model.save(training_folder + 'model.tf', save_format='tf')
-
-
-else: #Load TBNN model 
+    #---------------------------- Data loading and pre-processing -------------------------------- #
+    cst_list, df_param, df_data = loadData()
+    print('Data is loaded') 
     
-    with open(training_folder + 'history', 'rb') as file:
-            history = pickle.load(file)
+    # Reshape grad_u and stresses to num_points X 3 X 3 arrays
+    num_points = df_data.shape[0]
+    grad_u     = np.zeros((num_points, 3, 3))
+    sigma_sgs  = np.zeros((num_points, 3, 3))
     
-    model = keras.models.load_model(training_folder + 'model.tf')
-    model.summary() 
-
-    if (postpro_folder != training_folder): 
-        model.save(postpro_folder + 'model.tf', save_format='tf')
-
-
-
-#Plot loss history
-fig = plt.figure()
-fig.set_size_inches(3.5,3.5)
-plt.plot(history['loss'], label='loss')
-plt.plot(history['val_loss'], label='val_loss')
-plt.yscale("log") 
-plt.xlabel('Epoch')
-plt.ylabel('Error')
-plt.legend()
-plt.grid(True)
-plt.savefig(postpro_folder + '/figures/' + 'loss_history.pdf', format='pdf',bbox_inches='tight',pad_inches=0.1)
-
-# Make predictions on train and test data to get train error and test error
-prediction_train = model([x_train, tb_train]).numpy()
-prediction_test  = model([x_test, tb_test]).numpy()
-
-y_train = prediction_train
-y_test = prediction_test 
-
-# Enforce realizability
-if enforce_realizability:
-    for i in range(num_realizability_its):
-        y_train = TurbulenceDataProcessor.make_realizable(y_train)
-        y_test  = TurbulenceDataProcessor.make_realizable(y_test)
-    print("Realizability enforced.")
-
-#Statistics 
-y_train = y_train.reshape(-1, 3, 3)
-y_test  = y_test.reshape(-1, 3, 3)
-label_train     = label_train.reshape(-1,3,3)
-label_test      = label_test.reshape(-1,3,3)
-
-y_norm_train = np.zeros((y_train.shape[0],1))
-y_norm_test  = np.zeros((y_test.shape[0],1))
-label_norm_train = np.zeros((label_train.shape[0],1))
-label_norm_test  = np.zeros((label_test.shape[0],1))
-
-eig_val_train = np.zeros((label_train.shape[0],3))
-eig_val_test  = np.zeros((label_test.shape[0],3))
-eig_val_pred_train  = np.zeros((y_train.shape[0],3))
-eig_val_pred_test   = np.zeros((y_test.shape[0],3))
-
-for i in range(label_train.shape[0]): 
-    label_norm_train[i] = np.trace(np.matmul(label_train[i,:,:], label_train[i,:,:]))
-    y_norm_train[i]     = np.trace(np.matmul(y_train[i,:,:], y_train[i,:,:]))
-    eig_val_train[i,:], eig_vect             = np.linalg.eig(label_train[i,:,:])
-    eig_val_pred_train[i,:], eig_vect_pred   = np.linalg.eig(y_train[i,:,:])
-
-
-for i in range(label_test.shape[0]):    
-    label_norm_test[i]  = np.trace(np.matmul(label_test[i,:,:], label_test[i,:,:]))
-    y_norm_test[i]      = np.trace(np.matmul(y_test[i,:,:], y_test[i,:,:]))
-    eig_val_test[i,:], eig_vect             = np.linalg.eig(label_test[i,:,:])
-    eig_val_pred_test[i,:], eig_vect_pred   = np.linalg.eig(y_test[i,:,:])
-
-# ---------------------------- Model evaluation --------------------------- #
-# Model assessment based on stress tensor individual components 
+    # grad_u has 9 independent components 
+    grad_u[:,0,0] = df_data['dudx'].to_numpy()
+    grad_u[:,0,1] = df_data['dudy'].to_numpy()
+    grad_u[:,0,2] = df_data['dudz'].to_numpy()
+    grad_u[:,1,0] = df_data['dvdx'].to_numpy()
+    grad_u[:,1,1] = df_data['dvdy'].to_numpy()
+    grad_u[:,1,2] = df_data['dvdz'].to_numpy()
+    grad_u[:,2,0] = df_data['dwdx'].to_numpy()
+    grad_u[:,2,1] = df_data['dwdy'].to_numpy()
+    grad_u[:,2,2] = df_data['dwdz'].to_numpy()
     
-tau_test_flat = data_processor.calc_flatten_tensor(label_test)
-tau_pred_flat = data_processor.calc_flatten_tensor(y_test)
+    # sigma_sgs has 6 independent components 
+    sigma_sgs[:,0,0] = df_data['sig_xx']
+    sigma_sgs[:,0,1] = df_data['sig_xy']
+    sigma_sgs[:,0,2] = df_data['sig_xz']
+    sigma_sgs[:,1,0] = df_data['sig_xy'] #sig_yx = sig_xy
+    sigma_sgs[:,1,1] = df_data['sig_yy']
+    sigma_sgs[:,1,2] = df_data['sig_yz']
+    sigma_sgs[:,2,0] = df_data['sig_xz'] #sig_zx = sig_xz
+    sigma_sgs[:,2,1] = df_data['sig_yz'] #sig_zy = sig_yz
+    sigma_sgs[:,2,2] = df_data['sig_zz'] 
+    
+    
+    alp     = df_data['alp'].to_numpy().reshape(-1,1)
+    vrz     = df_data['vrz'].to_numpy().reshape(-1,1)
+    Delta_f = df_data['Delta_f'].to_numpy().reshape(-1,1)
+    
+    # Neural Network Parameters
+    enforce_realizability = False                 # Set to True to enforce realizability constraint on Reynolds stresses
+    num_realizability_its = 5                    # Number of iterations to enforce realizability
+    seed                  = 1234                 # Random seed
+    num_layers            = 8                    # Number of hidden layers
+    num_nodes             = 30                   # Number of nodes per layer
+    train_fraction        = 0.8                  # Fraction of data used for training 
+    val_fraction          = 1 - train_fraction   # Fraction of data used for validation/testing
+    initial_lr            = 0.0005               # Initial learning rate 
+    BATCH_SIZE            = 500                  # Size of a data batch
+    N_EPOCHS_MAX          = 1000                 # Maximum number of training epochs
+    activation            = 'relu'               # Activation function of the nodes 
+    # TBNN parametrs 
+    num_scalar_invariants = 3
+    num_tensors           = 4
+    
+    
+    # Model training options
+    train_model     = 0 # set to 1 to start new training 
+    resume_training = 0 # set to 1 to resume previous training 
+    # if neither train_model nor resume_training is set to 1 ('true'), the previously trained model from the given folder is loaded 
+    
+    # Create folder for saving model 
+    training_folder = './models/subgrid_stress_TBNN_model_subset/'
+    postpro_folder  = training_folder 
+    # postpro_folder  = './models/subgrid_stress_TBNN_model_withRealizability/' 
+    os.makedirs(training_folder,exist_ok=True)
+    os.makedirs(postpro_folder,exist_ok=True)
+    os.makedirs(postpro_folder + '/figures/',exist_ok=True)
+    
+    
+    #Compute strain rate and rotation rate tensors 
+    data_processor = TurbulenceDataProcessor()
+    Sij, Rij       = data_processor.calc_Sij_Rij(grad_u)
+    sb    = data_processor.calc_scalar_basis(Sij, Rij, num_invariants=num_scalar_invariants)  # Scalar basis
+    tb    = data_processor.calc_tensor_basis(Sij, Rij, num_tensor_basis=num_tensors)                         # Tensor basis
+    label = data_processor.calc_output(sigma_sgs)
+    
+    x = np.concatenate((sb, alp, Delta_f), axis=1)
+    print("Data processing: done")
+    
+    if seed:
+        np.random.seed(seed) # sets the random seed 
+    
+    # Split into training and test data sets
+    x_train, tb_train, label_train, x_test, tb_test, label_test, train_idx, test_idx = \
+        TurbulenceDataProcessor.train_test_split_TBNN(x, tb, label, fraction=train_fraction, seed=seed)
+    
+    if (train_model):
+        print("TBNN Model building starts...")
+    
+        #---------------------------- Build Tensor Basis Neural Network ----------------------------#
+        num_inputs       = x.shape[-1]
+        num_tensor_basis = tb.shape[1]
+        x_input          = tf.keras.Input(shape=num_inputs)
+        tb_input         = tf.keras.Input(shape=(num_tensor_basis,9))
+    
+        normalization_scalar_layer = tf.keras.layers.Normalization(axis=1, name='NormalizationLayerSB', input_dim=num_inputs)
+        normalization_scalar_layer.adapt(x)
+        scalar_layer               = normalization_scalar_layer(x_input)
+        hidden_layer               = tf.keras.layers.Dense(units=num_nodes, activation='relu')(scalar_layer)
+        for i in range(num_layers-1):
+            hidden_layer           = tf.keras.layers.Dense(units=num_nodes, activation='relu')(hidden_layer)
+        linear_layer               = tf.keras.layers.Dense(units=num_tensor_basis, activation='linear',name='LinearLayer')(hidden_layer)
+    
+        normalization_tensor_layer = tf.keras.layers.Normalization(axis=1, name='NormalizationLayerTB', input_dim=num_tensor_basis)
+        normalization_tensor_layer.adapt(tb)
+        tensor_layer               = normalization_tensor_layer(tb_input)
+        output                     = tf.keras.layers.Dot((1,1))([linear_layer, tensor_layer])
+        model                      = tf.keras.Model(inputs=[x_input, tb_input], outputs=output)
+    
+        tf.keras.utils.plot_model(model, training_folder + 'model.png') 
+    
+        #---------------------------- Compile model ----------------------------# 
+        n_train_tot     = x_train.shape[0]
+        n_val           = int(x_train.shape[0]*val_fraction)    # number of data points used for validation during training procedure
+        n_train         = n_train_tot - n_val                   # number of data points used for training 
+        steps_per_epoch = math.ceil(n_train/BATCH_SIZE)         # number of batch passes per epoch 
+        lr_schedule     = keras.optimizers.schedules.InverseTimeDecay(
+                            initial_lr, 
+                            decay_steps=steps_per_epoch*10, 
+                            decay_rate=1, 
+                            staircase=False) #decay applied every 10 epochs
+        model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(lr_schedule))
+        print("Model is compiled")
+        model.summary()
+    
+        # Creates callbacks for early stopping, log and checkpointing
+        stop_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20)
+    
+        #Train the model 
+        print("Model training starts...")
+        training_history = model.fit([x_train, tb_train], 
+                            label_train, 
+                            batch_size=BATCH_SIZE, 
+                            epochs=N_EPOCHS_MAX, 
+                            validation_split=val_fraction, 
+                            verbose=1, 
+                            callbacks=[stop_callback])
+    
+        history = training_history.history
+        with open(training_folder + 'history', 'wb') as file:
+            pickle.dump(history, file)
+    
+        print("Model saving ...")
+        model.save(training_folder + 'model.tf', save_format='tf')
+    
+    
+    else: #Load TBNN model 
+        
+        with open(training_folder + 'history', 'rb') as file:
+                history = pickle.load(file)
+        
+        model = keras.models.load_model(training_folder + 'model.tf')
+        model.summary() 
+    
+        if (postpro_folder != training_folder): 
+            model.save(postpro_folder + 'model.tf', save_format='tf')
+    
+    
+    
+    #Plot loss history
+    fig = plt.figure()
+    fig.set_size_inches(3.5,3.5)
+    plt.plot(history['loss'], label='loss')
+    plt.plot(history['val_loss'], label='val_loss')
+    plt.yscale("log") 
+    plt.xlabel('Epoch')
+    plt.ylabel('Error')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(postpro_folder + '/figures/' + 'loss_history.pdf', format='pdf',bbox_inches='tight',pad_inches=0.1)
+    
+    # Make predictions on train and test data to get train error and test error
+    prediction_train = model([x_train, tb_train]).numpy()
+    prediction_test  = model([x_test, tb_test]).numpy()
+    
+    y_train = prediction_train
+    y_test = prediction_test 
+    
+    # Enforce realizability
+    if enforce_realizability:
+        for i in range(num_realizability_its):
+            y_train = TurbulenceDataProcessor.make_realizable(y_train)
+            y_test  = TurbulenceDataProcessor.make_realizable(y_test)
+        print("Realizability enforced.")
+    
+    #Statistics 
+    y_train = y_train.reshape(-1, 3, 3)
+    y_test  = y_test.reshape(-1, 3, 3)
+    label_train     = label_train.reshape(-1,3,3)
+    label_test      = label_test.reshape(-1,3,3)
+    
+    y_norm_train = np.zeros((y_train.shape[0],1))
+    y_norm_test  = np.zeros((y_test.shape[0],1))
+    label_norm_train = np.zeros((label_train.shape[0],1))
+    label_norm_test  = np.zeros((label_test.shape[0],1))
+    
+    eig_val_train = np.zeros((label_train.shape[0],3))
+    eig_val_test  = np.zeros((label_test.shape[0],3))
+    eig_val_pred_train  = np.zeros((y_train.shape[0],3))
+    eig_val_pred_test   = np.zeros((y_test.shape[0],3))
+    
+    for i in range(label_train.shape[0]): 
+        label_norm_train[i] = np.trace(np.matmul(label_train[i,:,:], label_train[i,:,:]))
+        y_norm_train[i]     = np.trace(np.matmul(y_train[i,:,:], y_train[i,:,:]))
+        eig_val_train[i,:], eig_vect             = np.linalg.eig(label_train[i,:,:])
+        eig_val_pred_train[i,:], eig_vect_pred   = np.linalg.eig(y_train[i,:,:])
+    
+    
+    for i in range(label_test.shape[0]):    
+        label_norm_test[i]  = np.trace(np.matmul(label_test[i,:,:], label_test[i,:,:]))
+        y_norm_test[i]      = np.trace(np.matmul(y_test[i,:,:], y_test[i,:,:]))
+        eig_val_test[i,:], eig_vect             = np.linalg.eig(label_test[i,:,:])
+        eig_val_pred_test[i,:], eig_vect_pred   = np.linalg.eig(y_test[i,:,:])
+    
+    # ---------------------------- Model evaluation --------------------------- #
+    # Model assessment based on stress tensor individual components 
+        
+    tau_test_flat = data_processor.calc_flatten_tensor(label_test)
+    tau_pred_flat = data_processor.calc_flatten_tensor(y_test)
+    
+    X = tau_test_flat.flatten()
+    Y = tau_pred_flat.flatten()
+    rmse = mean_squared_error(X, Y, squared=False)
+    with open(training_folder + "rmse_tau_ij.csv", 'w') as file:
+        print('{:1.6f}'.format(rmse), file=file)
+    R2_test  = r2_score(X, Y)
+    
+    print ("R2 score on individual components:", R2_test)
+    
+    freq = 5
+    bounds = np.array([-0.5, 0.75])
+    x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
+    y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
+    fig = plt.figure()
+    fig.set_size_inches(3.5,3.5)
+    plt.plot(X[::freq], Y[::freq], marker='.', linestyle = 'none', alpha=0.8)
+    plt.xlabel(r'$\tau_{s,ij}^*$, fine-grid data')
+    plt.ylabel(r'$\tau_{s,ij}^*$, TBNN model') 
+    plt.xlim(bounds)
+    plt.ylim(bounds)
+    plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
+    plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
+    plt.savefig(postpro_folder  + '/figures/' + 'subgrid_stresses_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
+    
+    # Model assessment based on stress tensor norm 
+    R2_train = r2_score(label_norm_train, y_norm_train)
+    R2_test  = r2_score(label_norm_test, y_norm_test)
+    print ("R2 score on norm:", R2_test)
+    
+    bounds = np.array([0, 0.8])
+    x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
+    y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
+    fig = plt.figure()
+    fig.set_size_inches(3.5,3.5)
+    plt.plot(label_norm_test[::freq], y_norm_test[::freq], marker='.', linestyle = 'none', alpha=0.8)
+    plt.xlabel(r'$\boldsymbol{\tau}_s^* : \boldsymbol{\tau}_s^*$, fine-grid data')
+    plt.ylabel(r'$\boldsymbol{\tau}_s^* : \boldsymbol{\tau}_s^*$, TBNN model')
+    plt.xlim(bounds)
+    plt.ylim(bounds)
+    plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
+    plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
+    plt.savefig(postpro_folder  + '/figures/' + 'subgrid_stresses_norm_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
+    
+    # Model assessment based on stress tensor eigenvalues 
+    R2_train = r2_score(eig_val_train.flatten(), eig_val_pred_train.flatten())
+    R2_test  = r2_score(eig_val_test.flatten(),  eig_val_pred_test.flatten())
+    print ("R2 score on eigenvalues:", R2_test)
+    
+    bounds = np.array([-0.33, 0.66])
+    x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
+    y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
+    
+    fig = plt.figure()
+    fig.set_size_inches(3.5,3.5)
+    plt.plot(np.min(eig_val_test[::freq,:], axis=1), np.min(eig_val_pred_test[::freq,:],axis=1), marker='.', linestyle = 'none', alpha=0.8, label='$\lambda_{\mathrm{min}}$')
+    plt.plot(np.max(eig_val_test[::freq,:], axis=1), np.max(eig_val_pred_test[::freq,:],axis=1), marker='.', linestyle = 'none', alpha=0.8, label='$\lambda_{\mathrm{max}}$')
+    plt.xlabel(r'Eigenvalues $\boldsymbol{\tau}_s^*$, fine-grid data')
+    plt.ylabel(r'Eigenvalues $\boldsymbol{\tau}_s^*$, TBNN model')
+    plt.xlim(bounds)
+    plt.ylim(bounds)
+    plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
+    plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
+    plt.savefig(postpro_folder + '/figures/' + 'subgrid_stresses_eigenval_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
+    
+    # Acces output of selected layers
+    gn_model  = tf.keras.Model(model.input, model.get_layer(name='LinearLayer').output)
+    tb_model  = tf.keras.Model(model.input, model.get_layer(name='NormalizationLayerTB').output)
+    
+    gn_model_output  = gn_model.predict([x_test, tb_test])
+    tb_model_output  = tb_model.predict([x_test, tb_test])
+    
+    mean_contribution = np.mean(np.fabs(gn_model_output), axis=0)
+    rel_contribution  = mean_contribution/np.sum(mean_contribution)*100
+    
+    plt.show()
 
-X = tau_test_flat.flatten()
-Y = tau_pred_flat.flatten()
-rmse = mean_squared_error(X, Y, squared=False)
-with open(training_folder + "rmse_tau_ij.csv", 'w') as file:
-    print('{:1.6f}'.format(rmse), file=file)
-R2_test  = r2_score(X, Y)
-
-print ("R2 score on individual components:", R2_test)
-
-freq = 5
-bounds = np.array([-0.5, 0.75])
-x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
-y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
-fig = plt.figure()
-fig.set_size_inches(3.5,3.5)
-plt.plot(X[::freq], Y[::freq], marker='.', linestyle = 'none', alpha=0.8)
-plt.xlabel(r'$\tau_{s,ij}^*$, fine-grid data')
-plt.ylabel(r'$\tau_{s,ij}^*$, TBNN model') 
-plt.xlim(bounds)
-plt.ylim(bounds)
-plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
-plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
-plt.savefig(postpro_folder  + '/figures/' + 'subgrid_stresses_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
-
-# Model assessment based on stress tensor norm 
-R2_train = r2_score(label_norm_train, y_norm_train)
-R2_test  = r2_score(label_norm_test, y_norm_test)
-print ("R2 score on norm:", R2_test)
-
-bounds = np.array([0, 0.8])
-x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
-y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
-fig = plt.figure()
-fig.set_size_inches(3.5,3.5)
-plt.plot(label_norm_test[::freq], y_norm_test[::freq], marker='.', linestyle = 'none', alpha=0.8)
-plt.xlabel(r'$\boldsymbol{\tau}_s^* : \boldsymbol{\tau}_s^*$, fine-grid data')
-plt.ylabel(r'$\boldsymbol{\tau}_s^* : \boldsymbol{\tau}_s^*$, TBNN model')
-plt.xlim(bounds)
-plt.ylim(bounds)
-plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
-plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
-plt.savefig(postpro_folder  + '/figures/' + 'subgrid_stresses_norm_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
-
-# Model assessment based on stress tensor eigenvalues 
-R2_train = r2_score(eig_val_train.flatten(), eig_val_pred_train.flatten())
-R2_test  = r2_score(eig_val_test.flatten(),  eig_val_pred_test.flatten())
-print ("R2 score on eigenvalues:", R2_test)
-
-bounds = np.array([-0.33, 0.66])
-x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
-y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
-
-fig = plt.figure()
-fig.set_size_inches(3.5,3.5)
-plt.plot(np.min(eig_val_test[::freq,:], axis=1), np.min(eig_val_pred_test[::freq,:],axis=1), marker='.', linestyle = 'none', alpha=0.8, label='$\lambda_{\mathrm{min}}$')
-plt.plot(np.max(eig_val_test[::freq,:], axis=1), np.max(eig_val_pred_test[::freq,:],axis=1), marker='.', linestyle = 'none', alpha=0.8, label='$\lambda_{\mathrm{max}}$')
-plt.xlabel(r'Eigenvalues $\boldsymbol{\tau}_s^*$, fine-grid data')
-plt.ylabel(r'Eigenvalues $\boldsymbol{\tau}_s^*$, TBNN model')
-plt.xlim(bounds)
-plt.ylim(bounds)
-plt.plot(bounds, bounds, '-', color='tab:red', linewidth=1)
-plt.text(x0 , y0, '$R^2 = {:1.2f}$'.format(R2_test), fontsize = 16)
-plt.savefig(postpro_folder + '/figures/' + 'subgrid_stresses_eigenval_TBNN_scatter_plot.png', format='png',bbox_inches='tight',pad_inches=0.1)
-
-# Acces output of selected layers
-gn_model  = tf.keras.Model(model.input, model.get_layer(name='LinearLayer').output)
-tb_model  = tf.keras.Model(model.input, model.get_layer(name='NormalizationLayerTB').output)
-
-gn_model_output  = gn_model.predict([x_test, tb_test])
-tb_model_output  = tb_model.predict([x_test, tb_test])
-
-mean_contribution = np.mean(np.fabs(gn_model_output), axis=0)
-rel_contribution  = mean_contribution/np.sum(mean_contribution)*100
-
-plt.show()
-
-# if __name__ == "__main__":
-#     main()
-#     print("Job finished")
+if __name__ == "__main__":
+     main()
+     print("Job finished")
 
