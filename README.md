@@ -14,6 +14,7 @@ The `filtered_drag` folder contains:
 * The `models` subfolder containing the trained models:
     * `DF_generalizedModel_training_cases1to9`: drift flux model obtained from the full dataset 
     * `DF_generalizedModel_training_cases1to9_subset`: drift flux model obtained from the partial dataset shared in this repository
-  In both cases, the model is shared in two ways
-  * TensorFlow Saved format
-  * JSON-HDF5 combination
+  
+  In both cases, the model is shared (and can therefore be uploaded) in two ways
+  * TensorFlow Saved format: the whole model (architecture and weights) is saved in the `model.tf` folder
+  * JSON-HDF5 combination: the model architecture is saved in the `model.config.json` file, the weights are stored in the `model.weights.h5` binary file  
