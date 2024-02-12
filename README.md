@@ -10,8 +10,10 @@ The `data` folder contains the filtered dataset obtained from 10 cases with diff
 ## Models 
 ### For the filtered drag force
 The `filtered_drag` folder contains:
-* The Python source code to train and validate ANN models for the filtered drag force (`filtered_drag_ANN.py`)
-* The `models` subfolder containg a previously trained model and associated figures
-
-
-
+* The Python source code to train and validate ANN models for the filtered drag force (`filtered_drag_ANN.py`). The `terminalVelocity` module contains a routine to calculate the terminal settling velocity of a single isolated particle as a function of physical parameters.
+* The `models` subfolder containing the trained models:
+    * `DF_generalizedModel_training_cases1to9`: drift flux model obtained from the full dataset 
+    * `DF_generalizedModel_training_cases1to9_subset`: drift flux model obtained from the partial dataset shared in this repository
+  In both cases, the model is shared in two ways
+  * TensorFlow Saved format
+  * JSON-HDF5 combination
