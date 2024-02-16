@@ -44,7 +44,7 @@ Bibtex entries for the Jiang's studies:\
    doi = {https://doi.org/10.1016/j.powtec.2018.11.092}, \
    url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045} \
    author = {Yundi Jiang and Xiao Chen and Jari Kolehmainen and Ioannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan}, \
-}\
+}
 
 @article{jiangChemEngSci2021, \
 title = {Development of data-driven filtered drag model for industrial-scale fluidized beds}, \
