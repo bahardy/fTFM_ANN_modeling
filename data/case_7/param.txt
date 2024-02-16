@@ -1,3 +1,0 @@
-dp=180 mum
-rhop=1600 kg/m3
-<alpha_p>=0.05
