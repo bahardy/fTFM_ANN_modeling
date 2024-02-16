@@ -21,3 +21,13 @@ The `filtered_drag` folder contains:
  
 The features to be fed (in this order) to the network are the following: $\frac{\bar \phi_s}{\phi_{s,max}}$, $\frac{\tilde u_{slip,z}}{U_t}$ , $\frac{\partial \bar p_g}{\partial z}$, $Re_p$, $\frac{\bar \Delta}{d_p Fr_p^{1/3}}$.
 The data are automatically shifted by the mean and scaled by the standard deviation of the training sample through a Normalization preprocessing layer embedded in the network.
+
+## Bibtex
+@misc{hardy2023machine,
+      title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress}, 
+      author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},
+      year={2023},
+      eprint={2401.00179},
+      archivePrefix={arXiv},
+      primaryClass={physics.flu-dyn}
+}
