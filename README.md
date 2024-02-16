@@ -31,3 +31,19 @@ The data are automatically shifted by the mean and scaled by the standard deviat
    archivePrefix={arXiv},\
    primaryClass={physics.flu-dyn}
 }
+## Jiang et al.'s ANN Model 
+Jiang et al.'s ANM model has been used to generate Figure-e in the manusctipy. This model has been uploaded into "JiangANNModels" and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
+
+Jiang's studies:\
+@article{JIANG2019403,\
+   title = {Neural-network-based filtered drag model for gas-particle flows},\
+   journal = {Powder Technology},\
+   volume = {346},\
+   pages = {403-413},\
+   year = {2019},\
+   doi = {https://doi.org/10.1016/j.powtec.2018.11.092},\
+   url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045}\
+}\
+
+
+
