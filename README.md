@@ -24,10 +24,10 @@ The data are automatically shifted by the mean and scaled by the standard deviat
 
 ## Bibtex
 @misc{hardy2023machine,
-      title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress}, 
-      author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},
-      year={2023},
-      eprint={2401.00179},
-      archivePrefix={arXiv},
-      primaryClass={physics.flu-dyn}
+   title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress}, 
+   author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},
+   year={2023},
+   eprint={2401.00179},
+   archivePrefix={arXiv},
+   primaryClass={physics.flu-dyn}
 }
