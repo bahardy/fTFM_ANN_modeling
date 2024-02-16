@@ -35,7 +35,7 @@ The data are automatically shifted by the mean and scaled by the standard deviat
 Jiang et al.'s ANM model has been used to generate Figure-e in the manusctipy. This model has been uploaded into "JiangANNModels" and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
 
 Bibtex entries for the Jiang's studies:\
-@article{JIANG2019403,\
+@article{jiangPowTec2019,\
    title = {Neural-network-based filtered drag model for gas-particle flows},\
    journal = {Powder Technology},\
    volume = {346},\
@@ -43,7 +43,20 @@ Bibtex entries for the Jiang's studies:\
    year = {2019},\
    doi = {https://doi.org/10.1016/j.powtec.2018.11.092}, \
    url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045} \
+   author = {Yundi Jiang and Xiao Chen and Jari Kolehmainen and Ioannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan}, \
 }\
+
+@article{jiangChemEngSci2021, \
+title = {Development of data-driven filtered drag model for industrial-scale fluidized beds}, \
+journal = {Chemical Engineering Science}, \
+volume = {230}, \
+pages = {116235}, \
+year = {2021}, \
+issn = {0009-2509}, \
+doi = {https://doi.org/10.1016/j.ces.2020.116235}, \
+url = {https://www.sciencedirect.com/science/article/pii/S0009250920307673}, \
+author = {Yundi Jiang and Xiao Chen and Jari Kolehmainen and Ioannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan} \
+}
 
 
 
