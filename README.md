@@ -32,7 +32,7 @@ The data are automatically shifted by the mean and scaled by the standard deviat
    primaryClass={physics.flu-dyn}
 }
 ## Jiang et al.'s ANN Model 
-Jiang et al.'s ANM model has been used to generate Figure-3 in the manuscript. This model has been uploaded into "JiangANNModels" and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
+Jiang et al.'s ANM model has been used to generate Figure-3 in the manuscript. This model has been uploaded into the "JiangANNModels" folder and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
 
 Bibtex entries for the Jiang's studies:\
 @article{jiangPowTec2019,\
