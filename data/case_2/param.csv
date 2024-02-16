@@ -1,0 +1,8 @@
+gas_density, 1.2
+gas_visosity, 1.8e-5
+particle_diameter, 90e-6
+particle_density, 1500
+terminal_velocity, 0.2987
+mean_solid_vol_fraction, 0.05
+max_solid_vol_fraction, 0.64
+forcing, 746.93
