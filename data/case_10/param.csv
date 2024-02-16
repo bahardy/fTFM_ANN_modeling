@@ -1,5 +1,5 @@
 gas_density, 1.2
-gas_visosity, 1.8e-5
+gas_viscosity, 1.8e-5
 particle_diameter, 120e-6
 particle_density, 2000
 terminal_velocity, 0.6041
