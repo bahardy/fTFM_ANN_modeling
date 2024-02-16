@@ -41,8 +41,8 @@ Jiang's studies:\
    volume = {346},\
    pages = {403-413},\
    year = {2019},\
-   doi = {https://doi.org/10.1016/j.powtec.2018.11.092},\
-   url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045}\
+   doi = {https://doi.org/10.1016/j.powtec.2018.11.092}, \
+   url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045} \
 }\
 
 
