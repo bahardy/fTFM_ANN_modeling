@@ -27,9 +27,8 @@ The data are automatically shifted by the mean and scaled by the standard deviat
    title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress},\
    author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},\
    year={2023},\
-   eprint={2401.00179},\
-   archivePrefix={arXiv},\
-   primaryClass={physics.flu-dyn}
+   url = {https://arxiv.org/abs/2401.00179}, \
+   author = {Yundi Jiang and Jari Kolehmainen and Yile Gu and Yannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan} 
 }
 ## Jiang et al.'s ANN Model 
 Jiang et al.'s ANM model has been used to generate Figure-3 in the manuscript. This model has been uploaded into the "JiangANNModels" folder and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
@@ -43,7 +42,7 @@ Bibtex entries for the Jiang's studies:\
    year = {2019},\
    doi = {https://doi.org/10.1016/j.powtec.2018.11.092}, \
    url = {https://www.sciencedirect.com/science/article/pii/S0032591018310192#s0045} \
-   author = {Yundi Jiang and Jari Kolehmainen and Yile Gu and Yannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan},, \
+   author = {Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel} \
 }
 
 @article{jiangChemEngSci2021, \
