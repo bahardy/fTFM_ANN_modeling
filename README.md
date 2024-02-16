@@ -22,7 +22,7 @@ The `filtered_drag` folder contains:
 The features to be fed (in this order) to the network are the following: $\frac{\bar \phi_s}{\phi_{s,max}}$, $\frac{\tilde u_{slip,z}}{U_t}$ , $\frac{\partial \bar p_g}{\partial z}$, $Re_p$, $\frac{\bar \Delta}{d_p Fr_p^{1/3}}$.
 The data are automatically shifted by the mean and scaled by the standard deviation of the training sample through a Normalization preprocessing layer embedded in the network.
 
-## Manuscript@arXiv and Bibtex Source
+## Manuscript@arXiv and Bibtex Entry
 @misc{hardy2023machine,\
    title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress},\
    author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},\
@@ -34,7 +34,7 @@ The data are automatically shifted by the mean and scaled by the standard deviat
 ## Jiang et al.'s ANN Model 
 Jiang et al.'s ANM model has been used to generate Figure-e in the manusctipy. This model has been uploaded into "JiangANNModels" and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
 
-Bibtex sources for the Jiang's studies:\
+Bibtex entries for the Jiang's studies:\
 @article{JIANG2019403,\
    title = {Neural-network-based filtered drag model for gas-particle flows},\
    journal = {Powder Technology},\
