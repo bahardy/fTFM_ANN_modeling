@@ -27,7 +27,7 @@ The data are automatically shifted by the mean and scaled by the standard deviat
    title={Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress},\
    author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},\
    year={2023},\
-   url = {https://arxiv.org/abs/2401.00179}, \
+   url = {[https://arxiv.org/abs/2401.00179](https://arxiv.org/abs/2401.00179)}, \
 }
 ## Jiang et al.'s ANN Model 
 Jiang et al.'s ANM model has been used to generate Figure-3 in the manuscript. This model has been uploaded into the "JiangANNModels" folder and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
