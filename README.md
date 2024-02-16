@@ -5,7 +5,7 @@ This project is dedicated to the development of Artificial Neural Network (ANN) 
 The dataset used to train ANN models is obtained from fine-grid Two-Fluid simulation results of a tri-periodic gas-solid fluidized bed. Simulations have been performed using the NEPTUNE_CFD software. 
 The fine-grid simulation results have been filtered for a range of filter sizes. Only a subset of the full dataset is provided in this repository (about 6%). 
 
-The `data` folder contains the filtered dataset obtained from 10 cases with different physical parameters (see Table in REF or the param.txt file inside each subfolder).
+The `data` folder contains the filtered dataset obtained from 10 cases with different physical parameters (see Table-1 in https://arxiv.org/abs/2401.00179 or the param.txt file inside each subfolder).
 
 ## Models 
 ### For the filtered drag force
@@ -28,7 +28,6 @@ The data are automatically shifted by the mean and scaled by the standard deviat
    author={Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel},\
    year={2023},\
    url = {https://arxiv.org/abs/2401.00179}, \
-   author = {Yundi Jiang and Jari Kolehmainen and Yile Gu and Yannis G. Kevrekidis and Ali Ozel and Sankaran Sundaresan} 
 }
 ## Jiang et al.'s ANN Model 
 Jiang et al.'s ANM model has been used to generate Figure-3 in the manuscript. This model has been uploaded into the "JiangANNModels" folder and can be also found in https://github.com/yundij/ANN-sub-grid-Drag. 
