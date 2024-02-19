@@ -19,7 +19,7 @@ class TurbulenceDataProcessor(DataProcessor):
     def calc_Sij_Rij(grad_u, cap=float("inf")):
         """
         Calculates the strain rate and rotation rate tensors. 
-        Sij = 0.5* (grad_u  + grad_u^T)
+        Sij = 0.5* (grad_u  + grad_u^T) - 1/3 div(u)
         Rij = 0.5* (grad_u  - grad_u^T)
         :param grad_u: num_points X 3 X 3
         :return: Sij, Rij: num_points X 3 X 3 tensors
@@ -29,8 +29,10 @@ class TurbulenceDataProcessor(DataProcessor):
         Sij = np.zeros((num_points, 3, 3))
         Rij = np.zeros((num_points, 3, 3))
         for i in range(num_points):
-            Sij[i, :, :] = 0.5 * (grad_u[i, :, :] + np.transpose(grad_u[i, :, :])) - 1./3. * np.eye(3)*np.trace(Sij[i, :, :])
+            Sij[i, :, :] = 0.5 * (grad_u[i, :, :] + np.transpose(grad_u[i, :, :]))
             Rij[i, :, :] = 0.5 * (grad_u[i, :, :] - np.transpose(grad_u[i, :, :]))
+        for i in range(num_points): 
+            Sij[i, :, :] = Sij[i, :, :] - 1./3. * np.eye(3)*np.trace(Sij[i, :, :]) # deviatoric part 
 
         return Sij, Rij
 
