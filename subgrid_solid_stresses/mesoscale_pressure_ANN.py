@@ -23,12 +23,12 @@ plt.rcParams['figure.dpi'] = 300
 plt.rcParams['savefig.dpi'] = 300
 plt.rcParams['text.usetex'] = True
 
-plt.rcParams['axes.labelsize'] = 14
-plt.rcParams['axes.titlesize'] = 14
-plt.rcParams['xtick.labelsize'] = 14
-plt.rcParams['ytick.labelsize'] = 14
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['axes.titlesize'] = 10
+plt.rcParams['xtick.labelsize'] = 9
+plt.rcParams['ytick.labelsize'] = 9
 plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['lines.markersize'] = 3
+plt.rcParams['lines.markersize'] = 1
 
 
 #%% -------------- Load data --------------------- %%#
@@ -219,7 +219,7 @@ Y = y_test/(rho_p*Ut**2)
 R2_train = r2_score(X, Y)
 fig = plt.figure()
 fig.set_size_inches(3.5,3.5)
-plt.plot(X[::step], Y[::step], marker=',', markersize=0.5, linestyle = 'none', alpha=0.5)
+plt.plot(X[::step], Y[::step], marker='.', linestyle = 'none', alpha=0.5)
 plt.xlabel(r'$P_{s,\mathrm{meso}}^*$, fine-grid data')
 plt.ylabel(r'$P_{s,\mathrm{meso}}^*$, ANN model')
 # plt.xlabel(r'$P_{s,\mathrm{meso}}/(\rho_s U_t^2)$, fine-grid data')

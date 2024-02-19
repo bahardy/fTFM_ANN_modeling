@@ -25,13 +25,12 @@ plt.rcParams['figure.dpi'] = 300
 plt.rcParams['savefig.dpi'] = 300
 plt.rcParams['text.usetex'] = True
 
-plt.rcParams['axes.labelsize'] = 14
-plt.rcParams['axes.titlesize'] = 14
-plt.rcParams['xtick.labelsize'] = 14
-plt.rcParams['ytick.labelsize'] = 14
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['axes.titlesize'] = 10
+plt.rcParams['xtick.labelsize'] = 9
+plt.rcParams['ytick.labelsize'] = 9
 plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['lines.markersize'] = 3
-
+plt.rcParams['lines.markersize'] = 1
 
 #%% -------------- Load data --------------------- %%#
 cst_param, df_param, df_data = loadData()
@@ -99,7 +98,7 @@ initial_lr = 0.0005
 batch_size = 500
 n_epochs_max = 1000
 activation = 'relu'
-train_model = 0
+train_model = 1
 
 #Folder for the results of the training 
 training_folder = './models/eddy_viscosity_ANN_model_subset/'
@@ -207,7 +206,7 @@ prediction_train = model(x_train).numpy()
 prediction_test  = model(x_test).numpy()
 
 y_train = prediction_train
-y_test = prediction_test 
+y_test  = prediction_test 
 
 step = 1
 bounds = np.array([0, 0.015])
@@ -219,7 +218,7 @@ R2_train = r2_score(X, Y)
 
 fig = plt.figure()
 fig.set_size_inches(3.5,3.5)
-plt.plot(X[::step], Y[::step], marker=',', markersize=0.5, linestyle = 'none', alpha=0.5)
+plt.plot(X[::step], Y[::step], marker='.', linestyle = 'none', alpha=0.5)
 plt.xlabel(r'$\mu_{s,\mathrm{meso}}^{*}$, fine-grid data')
 plt.ylabel(r'$\mu_{s,\mathrm{meso}}^{*}$,  ANN model')
 plt.xlim(bounds)
@@ -251,7 +250,7 @@ Sij_test  = Sij[test_idx,:,:]
 # Exact stresses 
 tau            = data_processor.calc_dev_stresses(sigma_sgs)
 P_meso         = data_processor.calc_mesoscale_pressure(sigma_sgs)
-P_meso_test = P_meso[test_idx]
+P_meso_test    = P_meso[test_idx]
 for i in range(num_points):
     tau[i,:,:] = tau[i,:,:]/(3*P_meso[i])
 # tau_test      = tau[test_idx,:]
@@ -261,7 +260,7 @@ tau_test_flat = tau_flat[test_idx,:]
 # Predictions by eddy viscosity ANN model
 tau_pred  = np.zeros((n_test,3,3))
 for i in range(n_test):
-    tau_pred[i,:,:] = 2*mu_s[i]*Sij_test[i,:,:]/(3*P_meso_test[i])
+    tau_pred[i,:,:] = -2*mu_s[i]*Sij_test[i,:,:]/(3*P_meso_test[i])
 tau_pred_flat = data_processor.calc_flatten_tensor(tau_pred)
 
 X = tau_test_flat.flatten()
@@ -277,7 +276,7 @@ x0 = bounds[0] + 0.2*(bounds[1] - bounds[0])
 y0 = bounds[0] + 0.8*(bounds[1] - bounds[0])
 fig = plt.figure()
 fig.set_size_inches(3.5,3.5)
-plt.plot(X, Y, marker=',', markersize=0.5, linestyle = 'none', alpha=0.5)
+plt.plot(X, Y, marker='.', linestyle = 'none', alpha=0.5)
 plt.xlabel(r'$\tau_{s,ij}^*$, fine-grid data')
 plt.ylabel(r'$\tau_{s,ij}^*$, ANN model')
 plt.xlim(bounds)
