@@ -1,0 +1,15 @@
+filter_size, 0.0048
+solid_volume_fraction, 0.04065
+dudx,  0.2629638E+002 
+dudy, -0.2595742E+002 
+dudz,  0.2087346E+002
+dvdx,  0.3584907E+002
+dvdy, -0.1707533E+002
+dvdz,  0.6378417E+001 
+dwdx, -0.3913517E+002
+dwdy, -0.1583235E+003
+dwdz, -0.4592421E+001
+particle_diameter, 75E-006
+particle_density, 1500
+terminal_velocity, 0.2192
+maximum_solid_volume_fraction, 0.64
