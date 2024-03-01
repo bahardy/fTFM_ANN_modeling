@@ -1,6 +1,6 @@
 # fTFM_ANNmodeling
-This project is dedicated to the development of Artificial Neural Network (ANN) models to close the subgrid terms in the filtered Two-Fluid Model, namely the filtered drag force and the solid phase subgrid stresses.
-Paper Title: "Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress"
+This project is dedicated to the development of Artificial Neural Network (ANN) models to close the subgrid terms in the filtered Two-Fluid Model, namely the filtered drag force and the solid phase subgrid stresses.\
+Paper Title: "Machine learning approaches to close the filtered two-fluid model for gas-solid flows: Models for subgrid drag force and solid phase stress"\
 Authors: "Baptiste Hardy and Stefanie Rauchenzauner and Pascal Fede and Simon Schneiderbauer and Olivier Simonin and Sankaran Sundaresan and Ali Ozel"
 
 ## Dataset 
